@@ -2,19 +2,28 @@
 pragma solidity =0.7.6;
 pragma abicoder v2;
 
-import '@uniswap/v3-core/contracts/libraries/LowGasSafeMath.sol';
+import './libraries/LowGasSafeMath.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
 import './interfaces/IV2SwapRouter.sol';
 import './base/ImmutableState.sol';
 import './base/PeripheryPaymentsWithFeeExtended.sol';
 import './libraries/Constants.sol';
+
 import './libraries/UniswapV2Library.sol';
 
 /// @title Uniswap V2 Swap Router
 /// @notice Router for stateless execution of swaps against Uniswap V2
 abstract contract V2SwapRouter is IV2SwapRouter, ImmutableState, PeripheryPaymentsWithFeeExtended {
     using LowGasSafeMath for uint256;
+
+    event V2Swap(
+        address indexed sender,
+        address indexed recipient,
+        uint256 amountIn,
+        uint256 amountOut,
+        address[] path
+    );
 
     // supports fee-on-transfer tokens
     // requires the initial amount to have already been sent to the first pair
@@ -28,13 +37,15 @@ abstract contract V2SwapRouter is IV2SwapRouter, ImmutableState, PeripheryPaymen
             // scope to avoid stack too deep errors
             {
                 (uint256 reserve0, uint256 reserve1, ) = pair.getReserves();
-                (uint256 reserveInput, uint256 reserveOutput) =
-                    input == token0 ? (reserve0, reserve1) : (reserve1, reserve0);
+                (uint256 reserveInput, uint256 reserveOutput) = input == token0
+                    ? (reserve0, reserve1)
+                    : (reserve1, reserve0);
                 amountInput = IERC20(input).balanceOf(address(pair)).sub(reserveInput);
                 amountOutput = UniswapV2Library.getAmountOut(amountInput, reserveInput, reserveOutput);
             }
-            (uint256 amount0Out, uint256 amount1Out) =
-                input == token0 ? (uint256(0), amountOutput) : (amountOutput, uint256(0));
+            (uint256 amount0Out, uint256 amount1Out) = input == token0
+                ? (uint256(0), amountOutput)
+                : (amountOutput, uint256(0));
             address to = i < path.length - 2 ? UniswapV2Library.pairFor(factoryV2, output, path[i + 2]) : _to;
             pair.swap(amount0Out, amount1Out, to, new bytes(0));
         }
@@ -71,6 +82,7 @@ abstract contract V2SwapRouter is IV2SwapRouter, ImmutableState, PeripheryPaymen
 
         amountOut = IERC20(path[path.length - 1]).balanceOf(to).sub(balanceBefore);
         require(amountOut >= amountOutMin, 'Too little received');
+        emit V2Swap(msg.sender, to, amountIn, amountOut, path);
     }
 
     /// @inheritdoc IV2SwapRouter
@@ -90,5 +102,6 @@ abstract contract V2SwapRouter is IV2SwapRouter, ImmutableState, PeripheryPaymen
         else if (to == Constants.ADDRESS_THIS) to = address(this);
 
         _swap(path, to);
+        emit V2Swap(msg.sender, to, amountIn, amountOut, path);
     }
 }

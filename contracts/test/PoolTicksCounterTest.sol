@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-import '@uniswap/v3-core/contracts/interfaces/IUniswapV3Pool.sol';
+import "../interfaces/IUniswapV3Pool.sol";
 
 pragma solidity >=0.6.0;
 
-import '../libraries/PoolTicksCounter.sol';
+import "../libraries/PoolTicksCounter.sol";
 
 contract PoolTicksCounterTest {
     using PoolTicksCounter for IUniswapV3Pool;

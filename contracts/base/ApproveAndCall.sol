@@ -2,37 +2,49 @@
 pragma solidity =0.7.6;
 pragma abicoder v2;
 
-import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import '@uniswap/v3-periphery/contracts/interfaces/INonfungiblePositionManager.sol';
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "../interfaces/INonfungiblePositionManager.sol";
 
-import '../interfaces/IApproveAndCall.sol';
-import './ImmutableState.sol';
+import "../interfaces/IApproveAndCall.sol";
+import "./ImmutableState.sol";
 
 /// @title Approve and Call
 /// @notice Allows callers to approve the Uniswap V3 position manager from this contract,
 /// for any token, and then make calls into the position manager
 abstract contract ApproveAndCall is IApproveAndCall, ImmutableState {
     function tryApprove(address token, uint256 amount) private returns (bool) {
-        (bool success, bytes memory data) =
-            token.call(abi.encodeWithSelector(IERC20.approve.selector, positionManager, amount));
+        (bool success, bytes memory data) = token.call(
+            abi.encodeWithSelector(
+                IERC20.approve.selector,
+                positionManager,
+                amount
+            )
+        );
         return success && (data.length == 0 || abi.decode(data, (bool)));
     }
 
     /// @inheritdoc IApproveAndCall
-    function getApprovalType(address token, uint256 amount) external override returns (ApprovalType) {
+    function getApprovalType(
+        address token,
+        uint256 amount
+    ) external override returns (ApprovalType) {
         // check existing approval
-        if (IERC20(token).allowance(address(this), positionManager) >= amount) return ApprovalType.NOT_REQUIRED;
+        if (IERC20(token).allowance(address(this), positionManager) >= amount)
+            return ApprovalType.NOT_REQUIRED;
 
         // try type(uint256).max / type(uint256).max - 1
         if (tryApprove(token, type(uint256).max)) return ApprovalType.MAX;
-        if (tryApprove(token, type(uint256).max - 1)) return ApprovalType.MAX_MINUS_ONE;
+        if (tryApprove(token, type(uint256).max - 1))
+            return ApprovalType.MAX_MINUS_ONE;
 
         // set approval to 0 (must succeed)
         require(tryApprove(token, 0));
 
         // try type(uint256).max / type(uint256).max - 1
-        if (tryApprove(token, type(uint256).max)) return ApprovalType.ZERO_THEN_MAX;
-        if (tryApprove(token, type(uint256).max - 1)) return ApprovalType.ZERO_THEN_MAX_MINUS_ONE;
+        if (tryApprove(token, type(uint256).max))
+            return ApprovalType.ZERO_THEN_MAX;
+        if (tryApprove(token, type(uint256).max - 1))
+            return ApprovalType.ZERO_THEN_MAX_MINUS_ONE;
 
         revert();
     }
@@ -54,13 +66,17 @@ abstract contract ApproveAndCall is IApproveAndCall, ImmutableState {
     }
 
     /// @inheritdoc IApproveAndCall
-    function approveZeroThenMaxMinusOne(address token) external payable override {
+    function approveZeroThenMaxMinusOne(
+        address token
+    ) external payable override {
         require(tryApprove(token, 0));
         require(tryApprove(token, type(uint256).max - 1));
     }
 
     /// @inheritdoc IApproveAndCall
-    function callPositionManager(bytes memory data) public payable override returns (bytes memory result) {
+    function callPositionManager(
+        bytes memory data
+    ) public payable override returns (bytes memory result) {
         bool success;
         (success, result) = positionManager.call(data);
 
@@ -79,7 +95,9 @@ abstract contract ApproveAndCall is IApproveAndCall, ImmutableState {
     }
 
     /// @inheritdoc IApproveAndCall
-    function mint(MintParams calldata params) external payable override returns (bytes memory result) {
+    function mint(
+        MintParams calldata params
+    ) external payable override returns (bytes memory result) {
         return
             callPositionManager(
                 abi.encodeWithSelector(
@@ -102,12 +120,9 @@ abstract contract ApproveAndCall is IApproveAndCall, ImmutableState {
     }
 
     /// @inheritdoc IApproveAndCall
-    function increaseLiquidity(IncreaseLiquidityParams calldata params)
-        external
-        payable
-        override
-        returns (bytes memory result)
-    {
+    function increaseLiquidity(
+        IncreaseLiquidityParams calldata params
+    ) external payable override returns (bytes memory result) {
         return
             callPositionManager(
                 abi.encodeWithSelector(

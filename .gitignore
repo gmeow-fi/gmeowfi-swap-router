@@ -2,6 +2,7 @@ artifacts/
 cache/
 crytic-export/
 node_modules/
-typechain/
+typechain-types
 .env
 .vscode
+.yarn

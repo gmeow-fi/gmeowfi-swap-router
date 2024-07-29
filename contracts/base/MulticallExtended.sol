@@ -2,16 +2,23 @@
 pragma solidity =0.7.6;
 pragma abicoder v2;
 
-import '@uniswap/v3-periphery/contracts/base/Multicall.sol';
+import "./Multicall.sol";
 
-import '../interfaces/IMulticallExtended.sol';
-import '../base/PeripheryValidationExtended.sol';
+import "../interfaces/IMulticallExtended.sol";
+import "../base/PeripheryValidationExtended.sol";
 
 /// @title Multicall
 /// @notice Enables calling multiple methods in a single call to the contract
-abstract contract MulticallExtended is IMulticallExtended, Multicall, PeripheryValidationExtended {
+abstract contract MulticallExtended is
+    IMulticallExtended,
+    Multicall,
+    PeripheryValidationExtended
+{
     /// @inheritdoc IMulticallExtended
-    function multicall(uint256 deadline, bytes[] calldata data)
+    function multicall(
+        uint256 deadline,
+        bytes[] calldata data
+    )
         external
         payable
         override
@@ -22,7 +29,10 @@ abstract contract MulticallExtended is IMulticallExtended, Multicall, PeripheryV
     }
 
     /// @inheritdoc IMulticallExtended
-    function multicall(bytes32 previousBlockhash, bytes[] calldata data)
+    function multicall(
+        bytes32 previousBlockhash,
+        bytes[] calldata data
+    )
         external
         payable
         override

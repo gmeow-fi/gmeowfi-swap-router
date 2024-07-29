@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 pragma solidity >=0.7.5;
 
-import '@uniswap/v3-periphery/contracts/base/PeripheryPaymentsWithFee.sol';
+import "./PeripheryPaymentsWithFee.sol";
 
-import '../interfaces/IPeripheryPaymentsWithFeeExtended.sol';
-import './PeripheryPaymentsExtended.sol';
+import "../interfaces/IPeripheryPaymentsWithFeeExtended.sol";
+import "./PeripheryPaymentsExtended.sol";
 
 abstract contract PeripheryPaymentsWithFeeExtended is
     IPeripheryPaymentsWithFeeExtended,
@@ -27,6 +27,12 @@ abstract contract PeripheryPaymentsWithFeeExtended is
         uint256 feeBips,
         address feeRecipient
     ) external payable override {
-        sweepTokenWithFee(token, amountMinimum, msg.sender, feeBips, feeRecipient);
+        sweepTokenWithFee(
+            token,
+            amountMinimum,
+            msg.sender,
+            feeBips,
+            feeRecipient
+        );
     }
 }

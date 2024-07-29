@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity =0.7.6;
 
-import '@uniswap/v3-core/contracts/libraries/Oracle.sol';
+import "../libraries/Oracle.sol";
 
 contract MockObservations {
     using Oracle for Oracle.Observation[65535];
@@ -20,9 +20,9 @@ contract MockObservations {
         int24[3] memory ticks,
         bool mockLowObservationCardinality
     ) {
-        require(blockTimestamps[0] == 0, '0');
-        require(blockTimestamps[1] > 0, '1');
-        require(blockTimestamps[2] > blockTimestamps[1], '2');
+        require(blockTimestamps[0] == 0, "0");
+        require(blockTimestamps[1] > 0, "1");
+        require(blockTimestamps[2] > blockTimestamps[1], "2");
 
         int56 tickCumulative = 0;
         for (uint256 i = 0; i < blockTimestamps.length; i++) {
@@ -46,23 +46,28 @@ contract MockObservations {
     function slot0()
         external
         view
-        returns (
-            uint160,
-            int24,
-            uint16,
-            uint16,
-            uint16,
-            uint8,
-            bool
-        )
+        returns (uint160, int24, uint16, uint16, uint16, uint8, bool)
     {
-        return (0, slot0Tick, slot0ObservationIndex, slot0ObservationCardinality, 0, 0, false);
+        return (
+            0,
+            slot0Tick,
+            slot0ObservationIndex,
+            slot0ObservationCardinality,
+            0,
+            0,
+            false
+        );
     }
 
-    function observe(uint32[] calldata secondsAgos)
+    function observe(
+        uint32[] calldata secondsAgos
+    )
         external
         view
-        returns (int56[] memory tickCumulatives, uint160[] memory secondsPerLiquidityCumulativeX128s)
+        returns (
+            int56[] memory tickCumulatives,
+            uint160[] memory secondsPerLiquidityCumulativeX128s
+        )
     {
         return
             observations.observe(
