@@ -10,16 +10,16 @@ async function main() {
     ethers.parseUnits((await ethers.provider.getBalance(deployer.address)).toString(), 'wei').toString()
   )
   const v3Factory = {
-    address: '0x22Ae5d5a0Aa4d2763BE2A9090E1ea85E9BBE1f6b',
+    address: '0xaE218256bB7aD772F04c78D5fCb64E9AC73A22DA',
   }
   const v2Factory = {
-    address: '0xcE9dfc76AA9665865B5138dcc5052dE47981dE6B',
+    address: '0x3874db48bBDD965DA824BE998f63f5cF689D4f79',
   }
   const weth = {
     address: '0x4200000000000000000000000000000000000006',
   }
   const nftPositionManager = {
-    address: '0xdF90a7E2d144d5e205C55DAd27D5d95DEad773D1',
+    address: '0x959F24517aEecC15F718dFd9F29EBb61195C59BA',
   }
 
   const swapRouter2 = await deployContract(
